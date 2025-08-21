@@ -1,0 +1,1194 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 8.46kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for nvcr.io/nvidia/pytorch:25.06-py3
+#2 DONE 1.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/20] FROM nvcr.io/nvidia/pytorch:25.06-py3@sha256:025d9b102b5436d4af8af58f12c6a46b7e5d16f19543b1d2cc4446bf2650b4f1
+#4 DONE 0.0s
+
+#5 [ 3/20] RUN apt-get remove -y --allow-change-held-packages     ibverbs-utils     libibverbs-dev     libibverbs1     libmlx5-1     libnccl2     libnccl-dev
+#5 CACHED
+
+#6 [14/20] RUN curl -OL https://github.com/aws/aws-ofi-nccl/releases/download/${AWS_OFI_NCCL_VERSION}/aws-ofi-nccl-${AWS_OFI_NCCL_VERSION//v}.tar.gz     && tar -xf aws-ofi-nccl-${AWS_OFI_NCCL_VERSION//v}.tar.gz     && cd aws-ofi-nccl-${AWS_OFI_NCCL_VERSION//v}     && ./configure --prefix=/opt/aws-ofi-nccl/install         --with-mpi=/opt/amazon/openmpi         --with-libfabric=/opt/amazon/efa         --with-cuda=/usr/local/cuda         --enable-platform-aws     && make -j $(nproc)     && make install     && cd ..     && rm -rf aws-ofi-nccl-${AWS_OFI_NCCL_VERSION//v}     && rm aws-ofi-nccl-${AWS_OFI_NCCL_VERSION//v}.tar.gz
+#6 CACHED
+
+#7 [ 4/20] RUN test -d /opt/hpcx/ucx/lib && echo "/opt/hpcx/ucx/lib" > /etc/ld.so.conf.d/hpcx-ucx.conf || true     && ldconfig
+#7 CACHED
+
+#8 [ 9/20] RUN curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py     && python3 /tmp/get-pip.py     && pip3 install awscli pynvml
+#8 CACHED
+
+#9 [ 5/20] RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated     apt-utils     autoconf     automake     build-essential     check     cmake     curl     debhelper     devscripts     git     gcc     gdb     kmod     libsubunit-dev     libtool     openssh-client     openssh-server     pkg-config     vim
+#9 CACHED
+
+#10 [11/20] RUN cd $HOME     && curl -O https://efa-installer.amazonaws.com/aws-efa-installer-1.37.0.tar.gz     && tar -xf $HOME/aws-efa-installer-1.37.0.tar.gz     && cd aws-efa-installer     && ./efa_installer.sh -y -g -d --skip-kmod --skip-limit-conf --no-verify     && rm -rf $HOME/aws-efa-installer
+#10 CACHED
+
+#11 [ 7/20] RUN mkdir -p /var/run/sshd
+#11 CACHED
+
+#12 [15/20] RUN git clone -b v2.13.10 https://github.com/NVIDIA/nccl-tests.git /opt/nccl-tests     && cd /opt/nccl-tests     && make -j $(nproc)         MPI=1         MPI_HOME=/opt/amazon/openmpi/         CUDA_HOME=/usr/local/cuda         NCCL_HOME=/opt/nccl/build         NVCC_GENCODE="-gencode=arch=compute_90,code=sm_90 -gencode=arch=compute_90,code=compute_90"
+#12 CACHED
+
+#13 [13/20] RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libhwloc-dev
+#13 CACHED
+
+#14 [ 8/20] RUN sed -i 's/[ #]\(.*StrictHostKeyChecking \).*/ \1no/g' /etc/ssh/ssh_config &&     echo "    UserKnownHostsFile /dev/null" >> /etc/ssh/ssh_config &&     sed -i 's/#\(StrictModes \).*/\1no/g' /etc/ssh/sshd_config
+#14 CACHED
+
+#15 [ 6/20] RUN apt-get purge -y cuda-compat-*
+#15 CACHED
+
+#16 [10/20] RUN git clone -b v2.4.4 https://github.com/NVIDIA/gdrcopy.git /tmp/gdrcopy     && cd /tmp/gdrcopy     && make prefix=/opt/gdrcopy install
+#16 CACHED
+
+#17 [12/20] RUN git clone -b v2.23.4-1 https://github.com/NVIDIA/nccl.git  /opt/nccl     && cd /opt/nccl     && make -j $(nproc) src.build CUDA_HOME=/usr/local/cuda NVCC_GENCODE="-gencode=arch=compute_90,code=sm_90 -gencode=arch=compute_90,code=compute_90"
+#17 CACHED
+
+#18 [ 2/20] RUN apt-get update -y && apt-get upgrade -y
+#18 CACHED
+
+#19 [16/20] RUN rm -rf /var/lib/apt/lists/*
+#19 CACHED
+
+#20 [17/20] RUN curl -L https://developer.nvidia.com/downloads/assets/secure/nvshmem/nvshmem_src_3.2.5-1.txz -o /nvshmem_src_3.2.5-1.txz     && tar -xf /nvshmem_src_3.2.5-1.txz -C /     && cd /nvshmem_src     && mkdir -p build     && cd build     && cmake     -DNVSHMEM_PREFIX=/opt/nvshmem     -DCMAKE_INSTALL_PREFIX=/opt/nvshmem         -DCUDA_HOME=/usr/local/cuda     -DCMAKE_CUDA_ARCHITECTURES=90a         -DNVSHMEM_USE_GDRCOPY=1     -DGDRCOPY_HOME=/opt/gdrcopy         -DNVSHMEM_USE_NCCL=1     -DNCCL_HOME=/opt/nccl/build     -DNCCL_INCLUDE=/opt/nccl/build/include         -DNVSHMEM_LIBFABRIC_SUPPORT=1     -DLIBFABRIC_HOME=/opt/amazon/efa         -DNVSHMEM_MPI_SUPPORT=1     -DMPI_HOME=/opt/amazon/openmpi         -DNVSHMEM_PMIX_SUPPORT=1     -DPMIX_HOME=/opt/amazon/pmix     -DNVSHMEM_DEFAULT_PMIX=1         -DNVSHMEM_BUILD_TESTS=1     -DNVSHMEM_BUILD_EXAMPLES=0     -DNVSHMEM_BUILD_HYDRA_LAUNCHER=1     -DNVSHMEM_BUILD_TXZ_PACKAGE=1         -DNVSHMEM_IBRC_SUPPORT=1     -DNVSHMEM_IBGDA_SUPPORT=1         -DNVSHMEM_TIMEOUT_DEVICE_POLLING=0         -DNVSHMEM_DEBUG=WARN     -DNVSHMEM_TRACE=1     ..     && make -j$(nproc)     && make install
+#20 0.314   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+#20 0.314                                  Dload  Upload   Total   Spent    Left  Speed
+#20 0.314   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+#20 1.585   0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100  603k  100  603k    0     0   454k      0  0:00:01  0:00:01 --:--:-- 10.3M
+#20 1.678                                    **NVSHMEM OPTIONS OVERVIEW**                                   
+#20 1.678 
+#20 1.678 Options set to ON by Default
+#20 1.678 ___________________________________________________________________________________________________
+#20 1.678 
+#20 1.678 __BOOTSTRAP__
+#20 1.678 
+#20 1.678 NVSHMEM_MPI_SUPPORT: 1
+#20 1.678 
+#20 1.678 __TRANSPORT__
+#20 1.678 
+#20 1.678 NVSHMEM_IBRC_SUPPORT: 1
+#20 1.678 
+#20 1.678 __FUNCTIONALITY__
+#20 1.678 
+#20 1.678 NVSHMEM_USE_GDRCOPY: 1
+#20 1.678 NVSHMEM_NVTX: ON
+#20 1.678 
+#20 1.678 __BUILD__
+#20 1.678 
+#20 1.679 NVSHMEM_BUILD_TESTS: 1
+#20 1.679 NVSHMEM_BUILD_EXAMPLES: 0
+#20 1.679 ___________________________________________________________________________________________________
+#20 1.679 
+#20 1.679 
+#20 1.679 Options set to OFF by Default
+#20 1.679 ___________________________________________________________________________________________________
+#20 1.679 
+#20 1.679 __BOOTSTRAP__
+#20 1.679 
+#20 1.679 NVSHMEM_DEFAULT_PMI2: OFF
+#20 1.679 NVSHMEM_DEFAULT_PMIX: 1
+#20 1.679 NVSHMEM_PMIX_SUPPORT: 1
+#20 1.679 NVSHMEM_SHMEM_SUPPORT: OFF
+#20 1.679 
+#20 1.679 __TRANSPORT__
+#20 1.679 
+#20 1.679 NVSHMEM_DEFAULT_UCX: OFF
+#20 1.679 NVSHMEM_IBGDA_SUPPORT: 1
+#20 1.679 NVSHMEM_IBGDA_SUPPORT_GPUMEM_ONLY: OFF
+#20 1.679 NVSHMEM_IBDEVX_SUPPORT: OFF
+#20 1.679 NVSHMEM_LIBFABRIC_SUPPORT: 1
+#20 1.679 NVSHMEM_UCX_SUPPORT: OFF
+#20 1.679 
+#20 1.679 __FUNCTIONALITY__
+#20 1.679 
+#20 1.679 NVSHMEM_USE_DLMALLOC: OFF
+#20 1.679 NVSHMEM_USE_NCCL: 1
+#20 1.679 NVSHMEM_ENABLE_ALL_DEVICE_INLINING: OFF
+#20 1.679 NVSHMEM_GPU_COLL_USE_LDST: OFF
+#20 1.679 NVSHMEM_TIMEOUT_DEVICE_POLLING: 0
+#20 1.679 
+#20 1.679 __BUILD__
+#20 1.679 
+#20 1.679 NVSHMEM_DEBUG: WARN
+#20 1.679 NVSHMEM_DEVEL: OFF
+#20 1.679 NVSHMEM_TRACE: 1
+#20 1.679 NVSHMEM_VERBOSE: OFF
+#20 1.679 NVSHMEM_ENV_ALL: OFF
+#20 1.679 ___________________________________________________________________________________________________
+#20 1.679 
+#20 1.679 
+#20 1.679 Paths of dependencies
+#20 1.679 ___________________________________________________________________________________________________
+#20 1.679 CUDA_HOME: /usr/local/cuda
+#20 1.679 GDRCOPY_HOME: /opt/gdrcopy
+#20 1.679 LIBFABRIC_HOME: /opt/amazon/efa
+#20 1.679 NVSHMEM_CLANG_DIR: 
+#20 1.679 MPI_HOME: /opt/amazon/openmpi
+#20 1.679 NCCL_HOME: /opt/nccl/build
+#20 1.679 NVSHMEM_PREFIX: /opt/nvshmem
+#20 1.679 PMIX_HOME: /opt/amazon/pmix
+#20 1.679 SHMEM_HOME: /opt/amazon/openmpi
+#20 1.679 UCX_HOME: /usr/local/ucx
+#20 1.679 ___________________________________________________________________________________________________
+#20 1.679 
+#20 1.679 
+#20 1.679 Packaging specific options set to OFF by default
+#20 1.679 ___________________________________________________________________________________________________
+#20 1.679 NVSHMEM_BUILD_PACKAGES: OFF
+#20 1.679 NVSHMEM_BUILD_RPM_PACKAGE: OFF
+#20 1.679 NVSHMEM_BUILD_DEB_PACKAGE: OFF
+#20 1.679 NVSHMEM_BUILD_TGZ_PACKAGE: OFF
+#20 1.679 NVSHMEM_BUILD_BITCODE_LIBRARY: OFF
+#20 1.679 ___________________________________________________________________________________________________
+#20 1.679 
+#20 1.679 
+#20 1.679 Packaging specific options set to ON by default
+#20 1.679 ___________________________________________________________________________________________________
+#20 1.679 NVSHMEM_BUILD_HYDRA_LAUNCHER: 1
+#20 1.679 NVSHMEM_BUILD_TXZ_PACKAGE: 1
+#20 1.679 ___________________________________________________________________________________________________
+#20 1.679 
+#20 1.679 
+#20 1.680 -- Setting build type to Debug as requested by the environment.
+#20 1.680 -- CUDA_HOME: /usr/local/cuda
+#20 2.670 -- The CUDA compiler identification is NVIDIA 12.9.86
+#20 2.722 -- The CXX compiler identification is GNU 13.3.0
+#20 2.764 -- The C compiler identification is GNU 13.3.0
+#20 2.774 -- Detecting CUDA compiler ABI info
+#20 4.023 -- Detecting CUDA compiler ABI info - done
+#20 4.053 -- Check for working CUDA compiler: /usr/local/cuda/bin/nvcc - skipped
+#20 4.056 -- Detecting CUDA compile features
+#20 4.056 -- Detecting CUDA compile features - done
+#20 4.067 -- Detecting CXX compiler ABI info
+#20 4.184 -- Detecting CXX compiler ABI info - done
+#20 4.193 -- Check for working CXX compiler: /usr/bin/c++ - skipped
+#20 4.193 -- Detecting CXX compile features
+#20 4.193 -- Detecting CXX compile features - done
+#20 4.203 -- Detecting C compiler ABI info
+#20 4.311 -- Detecting C compiler ABI info - done
+#20 4.320 -- Check for working C compiler: /usr/bin/cc - skipped
+#20 4.320 -- Detecting C compile features
+#20 4.320 -- Detecting C compile features - done
+#20 4.323 -- Found CUDAToolkit: /usr/local/cuda/targets/x86_64-linux/include (found version "12.9.86") 
+#20 4.331 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+#20 4.438 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+#20 4.438 -- Found Threads: TRUE  
+#20 4.502 -- CMAKE_CUDA_ARCHITECTURES: 90a
+#20 4.694 -- Found MPI_C: /opt/amazon/openmpi/lib/libmpi.so (found version "3.1") 
+#20 5.033 -- Found MPI_CXX: /opt/amazon/openmpi/lib/libmpi.so (found version "3.1") 
+#20 5.033 -- Found MPI: TRUE (found version "3.1")  
+#20 5.040 -- Performing Test NVCC_THREADS
+#20 5.900 -- Performing Test NVCC_THREADS - Success
+#20 5.918 -- Performing Test HAVE_IBV_ACCESS_RELAXED_ORDERING
+#20 6.034 -- Performing Test HAVE_IBV_ACCESS_RELAXED_ORDERING - Success
+#20 6.035 -- Performing Test HAVE_MLX5DV_UAR_ALLOC_TYPE_NC_DEDICATED
+#20 6.153 -- Performing Test HAVE_MLX5DV_UAR_ALLOC_TYPE_NC_DEDICATED - Success
+#20 6.153 -- Performing Test HAVE_MLX5DV_UMEM_MASK_DMABUF
+#20 6.273 -- Performing Test HAVE_MLX5DV_UMEM_MASK_DMABUF - Success
+#20 6.297 -- Configuring done (4.6s)
+#20 6.400 -- Generating done (0.1s)
+#20 6.404 -- Build files have been written to: /nvshmem_src/build
+#20 6.509 [  0%] Building CXX object src/CMakeFiles/nvshmem_transport_ibgda.dir/modules/transport/common/transport_gdr_common.cpp.o
+#20 6.511 [  0%] Building CXX object src/CMakeFiles/nvshmem_transport_ibgda.dir/modules/transport/common/transport_common.cpp.o
+#20 6.512 [  1%] Building CXX object src/CMakeFiles/nvshmem_transport_ibgda.dir/modules/transport/common/transport_ib_common.cpp.o
+#20 6.513 [  2%] Building C object src/CMakeFiles/nvshmem_bootstrap_mpi.dir/modules/bootstrap/mpi/bootstrap_mpi.c.o
+#20 6.513 [  3%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_uid.dir/modules/bootstrap/common/bootstrap_util.cpp.o
+#20 6.514 [  3%] Creating directories for 'nvshmem_device_project'
+#20 6.514 [  3%] Building CXX object src/CMakeFiles/nvshmem.dir/host/bootstrap/bootstrap.cpp.o
+#20 6.514 [  3%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_pmi2.dir/modules/bootstrap/common/bootstrap_util.cpp.o
+#20 6.514 [  3%] Building CXX object src/CMakeFiles/nvshmem_transport_ibgda.dir/modules/transport/ibgda/ibgda.cpp.o
+#20 6.515 [  3%] Building CXX object src/CMakeFiles/nvshmem_transport_ibgda.dir/modules/transport/common/transport_mlx5_common.cpp.o
+#20 6.515 [  4%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_pmix.dir/modules/bootstrap/common/bootstrap_util.cpp.o
+#20 6.516 [  4%] Building CXX object src/CMakeFiles/nvshmem_transport_libfabric.dir/modules/transport/libfabric/libfabric.cpp.o
+#20 6.517 [  4%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_mpi.dir/modules/bootstrap/common/bootstrap_util.cpp.o
+#20 6.519 [  4%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_pmi.dir/modules/bootstrap/common/bootstrap_util.cpp.o
+#20 6.530 [  4%] Building CXX object src/CMakeFiles/nvshmem_transport_ibrc.dir/modules/transport/ibrc/ibrc.cpp.o
+#20 6.642 [  5%] No download step for 'nvshmem_device_project'
+#20 6.669 [  6%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_pmi.dir/modules/bootstrap/pmi/bootstrap_pmi.cpp.o
+#20 6.705 [  6%] Built target git_commit
+#20 6.747 [  6%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_pmi.dir/modules/bootstrap/pmi/simple-pmi/simple_pmi.cpp.o
+#20 6.755 [  6%] No update step for 'nvshmem_device_project'
+#20 6.783 [  6%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_uid.dir/modules/bootstrap/uid/ncclSocket/ncclsocket_socket.cpp.o
+#20 6.818 [  7%] Building CXX object src/CMakeFiles/nvshmem_transport_ibrc.dir/modules/transport/common/transport_common.cpp.o
+#20 6.818 [  7%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_pmi.dir/modules/bootstrap/pmi/simple-pmi/simple_pmiutil.cpp.o
+#20 6.863 [  7%] Linking CXX shared library lib/nvshmem_bootstrap_mpi.so
+#20 6.867 [  7%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_pmi2.dir/modules/bootstrap/pmi/bootstrap_pmi.cpp.o
+#20 6.868 [  7%] Building CXX object src/CMakeFiles/nvshmem_transport_ibrc.dir/modules/transport/common/transport_ib_common.cpp.o
+#20 6.870 [  7%] Building C object src/CMakeFiles/nvshmem_bootstrap_pmix.dir/modules/bootstrap/pmix/bootstrap_pmix.c.o
+#20 6.878 [  7%] No patch step for 'nvshmem_device_project'
+#20 6.888 [  7%] Building CXX object src/CMakeFiles/nvshmem_transport_libfabric.dir/modules/transport/common/transport_common.cpp.o
+#20 6.915 [  7%] Building CXX object src/CMakeFiles/nvshmem_transport_ibrc.dir/modules/transport/common/transport_gdr_common.cpp.o
+#20 6.967 [  8%] Building C object src/CMakeFiles/nvshmem_bootstrap_pmi2.dir/modules/bootstrap/pmi/pmi-2/pmi2_api.c.o
+#20 6.970 [  8%] Building CXX object src/CMakeFiles/nvshmem_bootstrap_uid.dir/modules/bootstrap/uid/bootstrap_uid.cpp.o
+#20 6.999 [  9%] Performing configure step for 'nvshmem_device_project'
+#20 7.027 [  9%] Linking CXX shared library lib/nvshmem_bootstrap_pmix.so
+#20 7.029 [ 10%] Linking CXX shared library lib/nvshmem_bootstrap_pmi.so
+#20 7.047 loading initial cache file /nvshmem_src/build/src/nvshmem_device_project-prefix/tmp/nvshmem_device_project-cache-debug.cmake
+#20 7.048 -- Setting build type to Debug as requested by the environment.
+#20 7.049 -- CUDA_DEVICELIB_HOME: /usr/local/cuda
+#20 7.059 [ 10%] Building CXX object src/CMakeFiles/nvshmem.dir/host/bootstrap/bootstrap_loader.cpp.o
+#20 7.069 [ 10%] Built target nvshmem_bootstrap_mpi
+#20 7.120 [ 10%] Building C object src/CMakeFiles/nvshmem_bootstrap_pmi2.dir/modules/bootstrap/pmi/pmi-2/pmi2_util.c.o
+#20 7.184 [ 11%] Building CXX object src/CMakeFiles/nvshmem_transport_libfabric.dir/modules/transport/common/transport_gdr_common.cpp.o
+#20 7.208 [ 12%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/cpu_coll.cpp.o
+#20 7.230 [ 12%] Built target nvshmem_bootstrap_pmix
+#20 7.232 [ 12%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/alltoall/alltoall.cpp.o
+#20 7.237 [ 12%] Built target nvshmem_bootstrap_pmi
+#20 7.241 [ 12%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/alltoall/alltoall_on_stream.cpp.o
+#20 7.241 [ 13%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/barrier/barrier.cpp.o
+#20 7.244 [ 13%] Linking CXX shared library lib/nvshmem_bootstrap_pmi2.so
+#20 7.250 [ 13%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/barrier/barrier_on_stream.cpp.o
+#20 7.271 [ 13%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/broadcast/broadcast.cpp.o
+#20 7.277 [ 14%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/broadcast/broadcast_on_stream.cpp.o
+#20 7.315 [ 14%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/fcollect/fcollect.cpp.o
+#20 7.354 [ 15%] Linking CXX shared library lib/nvshmem_bootstrap_uid.so
+#20 7.446 [ 15%] Built target nvshmem_bootstrap_pmi2
+#20 7.490 [ 16%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/rdxn/rdxn.cpp.o
+#20 7.494 [ 16%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/fcollect/fcollect_on_stream.cpp.o
+#20 7.562 [ 16%] Built target nvshmem_bootstrap_uid
+#20 7.603 [ 16%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/rdxn/rdxn_on_stream.cpp.o
+#20 8.143 [ 16%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/reducescatter/reducescatter.cpp.o
+#20 8.354 [ 17%] Building CXX object src/CMakeFiles/nvshmem.dir/host/coll/reducescatter/reducescatter_on_stream.cpp.o
+#20 8.746 -- The CUDA compiler identification is NVIDIA 12.9.86
+#20 8.834 -- The CXX compiler identification is GNU 13.3.0
+#20 8.909 -- The C compiler identification is GNU 13.3.0
+#20 8.929 -- Detecting CUDA compiler ABI info
+#20 8.939 [ 17%] Linking CXX shared library lib/nvshmem_transport_libfabric.so
+#20 9.153 [ 17%] Built target nvshmem_transport_libfabric
+#20 9.190 [ 17%] Building CXX object src/CMakeFiles/nvshmem.dir/host/comm/putget.cpp.o
+#20 9.357 [ 18%] Linking CXX shared library lib/nvshmem_transport_ibrc.so
+#20 9.584 [ 18%] Built target nvshmem_transport_ibrc
+#20 9.629 [ 18%] Building CXX object src/CMakeFiles/nvshmem.dir/host/comm/fence.cpp.o
+#20 9.691 [ 19%] Building CXX object src/CMakeFiles/nvshmem.dir/host/comm/quiet.cpp.o
+#20 9.760 [ 19%] Building CXX object src/CMakeFiles/nvshmem.dir/host/comm/sync.cpp.o
+#20 9.764 [ 20%] Linking CXX shared library lib/nvshmem_transport_ibgda.so
+#20 9.997 [ 20%] Built target nvshmem_transport_ibgda
+#20 10.04 [ 20%] Building CXX object src/CMakeFiles/nvshmem.dir/host/comm/amo.cpp.o
+#20 10.59 [ 21%] Building CXX object src/CMakeFiles/nvshmem.dir/host/proxy/proxy.cpp.o
+#20 10.64 [ 21%] Building CXX object src/CMakeFiles/nvshmem.dir/host/transport/transport.cpp.o
+#20 10.65 [ 21%] Building CXX object src/CMakeFiles/nvshmem.dir/host/transport/p2p/p2p.cpp.o
+#20 10.67 [ 22%] Building CXX object src/CMakeFiles/nvshmem.dir/host/init/cudawrap.cpp.o
+#20 10.78 [ 22%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/init/init.cu.o
+#20 10.80 [ 22%] Building CXX object src/CMakeFiles/nvshmem.dir/host/init/init_nvtx.cpp.o
+#20 11.23 -- Detecting CUDA compiler ABI info - done
+#20 11.34 [ 23%] Building CXX object src/CMakeFiles/nvshmem.dir/host/init/nvmlwrap.cpp.o
+#20 11.34 -- Check for working CUDA compiler: /usr/local/cuda/bin/nvcc - skipped
+#20 11.35 -- Detecting CUDA compile features
+#20 11.35 -- Detecting CUDA compile features - done
+#20 11.37 -- Detecting CXX compiler ABI info
+#20 11.46 [ 23%] Building CXX object src/CMakeFiles/nvshmem.dir/host/init/query_host.cpp.o
+#20 11.58 -- Detecting CXX compiler ABI info - done
+#20 11.60 -- Check for working CXX compiler: /usr/bin/c++ - skipped
+#20 11.60 -- Detecting CXX compile features
+#20 11.60 -- Detecting CXX compile features - done
+#20 11.62 -- Detecting C compiler ABI info
+#20 11.81 -- Detecting C compiler ABI info - done
+#20 11.82 -- Check for working C compiler: /usr/bin/cc - skipped
+#20 11.83 -- Detecting C compile features
+#20 11.83 -- Detecting C compile features - done
+#20 11.83 -- Found CUDAToolkit: /usr/local/cuda/targets/x86_64-linux/include (found version "12.9.86") 
+#20 11.84 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+#20 11.93 [ 23%] Building CXX object src/CMakeFiles/nvshmem.dir/host/mem/mem.cpp.o
+#20 11.96 [ 24%] Building CXX object src/CMakeFiles/nvshmem.dir/host/mem/mem_heap.cpp.o
+#20 12.03 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+#20 12.03 -- Found Threads: TRUE  
+#20 12.03 [ 24%] Building CXX object src/CMakeFiles/nvshmem.dir/host/mem/mem_transport.cpp.o
+#20 12.09 [ 24%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/team/team.cu.o
+#20 12.12 [ 25%] Building CXX object src/CMakeFiles/nvshmem.dir/host/team/team_internal.cpp.o
+#20 12.16 -- CMAKE_CUDA_ARCHITECTURES: 90a
+#20 12.16 -- CMAKE_CUDA_COMPILER: /usr/local/cuda/bin/nvcc
+#20 12.16 -- NVSHMEM_PREFIX: /opt/nvshmem
+#20 12.16 -- NVSHMEM_DEBUG: WARN
+#20 12.16 -- Configuring done (5.1s)
+#20 12.17 -- Generating done (0.0s)
+#20 12.17 -- Build files have been written to: /nvshmem_src/build/src/device
+#20 12.24 [ 25%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/team/team_internal_cuda.cu.o
+#20 12.33 [ 25%] Performing build step for 'nvshmem_device_project'
+#20 12.60 [ 25%] Building CUDA object CMakeFiles/nvshmem_device.dir/init/init_device.cu.o
+#20 12.81 [ 25%] Building CXX object src/CMakeFiles/nvshmem.dir/host/team/team_internal_nvls.cpp.o
+#20 13.39 [ 50%] Building CXX object CMakeFiles/nvshmem_device.dir/launch/collective_launch.cpp.o
+#20 13.58 [ 75%] Building CUDA object CMakeFiles/nvshmem_device.dir/comm/transfer_device.cu.o
+#20 13.71 [ 26%] Building CXX object src/CMakeFiles/nvshmem.dir/host/topo/topo.cpp.o
+#20 13.76 [ 26%] Building CXX object src/CMakeFiles/nvshmem.dir/host/util/cs.cpp.o
+#20 13.81 [ 26%] Building CXX object src/CMakeFiles/nvshmem.dir/host/util/debug.cpp.o
+#20 13.89 [ 27%] Building CXX object src/CMakeFiles/nvshmem.dir/host/util/env_vars.cpp.o
+#20 13.98 [ 27%] Building CXX object src/CMakeFiles/nvshmem.dir/host/util/util.cpp.o
+#20 14.16 [ 27%] Building CXX object src/CMakeFiles/nvshmem.dir/host/util/sockets.cpp.o
+#20 14.33 [ 28%] Building CXX object src/CMakeFiles/nvshmem.dir/host/util/shared_memory.cpp.o
+#20 14.41 [ 28%] Building CXX object src/CMakeFiles/nvshmem.dir/host/mem/custom_malloc.cpp.o
+#20 14.49 [ 28%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/comm/rma.cu.o
+#20 14.53 [ 29%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/comm/quiet_on_stream.cu.o
+#20 14.58 [ 29%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/comm/cuda_interface_sync.cu.o
+#20 15.02 [ 29%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/alltoall/alltoall.cu.o
+#20 15.06 [ 30%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/barrier/barrier.cu.o
+#20 15.12 [ 30%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/broadcast/broadcast.cu.o
+#20 15.48 [ 30%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/fcollect/fcollect.cu.o
+#20 15.70 [ 31%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/rdxn/reduce_and.cu.o
+#20 16.39 [ 31%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/rdxn/reduce_or.cu.o
+#20 16.43 [ 31%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/rdxn/reduce_xor.cu.o
+#20 16.94 [ 32%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/rdxn/reduce_min.cu.o
+#20 17.00 [ 32%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/rdxn/reduce_max.cu.o
+#20 17.20 [ 32%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/rdxn/reduce_prod.cu.o
+#20 17.44 [ 33%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/rdxn/reduce_sum.cu.o
+#20 19.92 [ 33%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/rdxn/reduce_team.cu.o
+#20 20.27 [ 34%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/reducescatter/reducescatter_and.cu.o
+#20 20.58 [ 34%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/reducescatter/reducescatter_or.cu.o
+#20 22.59 [ 34%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/reducescatter/reducescatter_xor.cu.o
+#20 26.66 [ 35%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/reducescatter/reducescatter_min.cu.o
+#20 29.12 [ 35%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/reducescatter/reducescatter_max.cu.o
+#20 30.03 [ 35%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/reducescatter/reducescatter_prod.cu.o
+#20 31.57 [ 36%] Building CUDA object src/CMakeFiles/nvshmem.dir/host/stream/coll/reducescatter/reducescatter_sum.cu.o
+#20 34.77 [ 36%] Building CUDA object src/CMakeFiles/nvshmem.dir/device/init/init_device.cu.o
+#20 35.35 [ 36%] Building CXX object src/CMakeFiles/nvshmem.dir/device/launch/collective_launch.cpp.o
+#20 35.87 [ 37%] Building CUDA object src/CMakeFiles/nvshmem.dir/device/comm/transfer_device.cu.o
+#20 52.87 [100%] Linking CXX static library /nvshmem_src/build/src/lib/libnvshmem_device.a
+#20 53.12 [100%] Built target nvshmem_device
+#20 53.20 [ 37%] Built target nvshmem_device_project-build
+#20 53.37 [ 38%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/bootstrap/bootstrap.cpp.o
+#20 53.38 [ 38%] Performing install step for 'nvshmem_device_project'
+#20 53.38 [ 38%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/alltoall/alltoall_on_stream.cpp.o
+#20 53.39 [ 38%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/barrier/barrier.cpp.o
+#20 53.39 [ 39%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/alltoall/alltoall.cpp.o
+#20 53.39 [ 39%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/bootstrap/bootstrap_loader.cpp.o
+#20 53.39 [ 39%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/cpu_coll.cpp.o
+#20 53.41 [ 40%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/barrier/barrier_on_stream.cpp.o
+#20 53.70 [100%] Built target nvshmem_device
+#20 53.78 [ 40%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/broadcast/broadcast.cpp.o
+#20 53.81 Install the project...
+#20 53.83 -- Install configuration: "debug"
+#20 53.84 -- Installing: /nvshmem_src/build/src/device/../../lib/cmake/nvshmem/NVSHMEMDeviceTargets.cmake
+#20 53.84 -- Installing: /nvshmem_src/build/src/device/../../lib/cmake/nvshmem/NVSHMEMDeviceTargets-debug.cmake
+#20 53.84 -- Installing: /nvshmem_src/build/src/device/../../lib/libnvshmem_device.a
+#20 53.94 [ 40%] Built target nvshmem_device_project-install
+#20 54.02 [ 40%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/broadcast/broadcast_on_stream.cpp.o
+#20 55.22 [ 41%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/fcollect/fcollect.cpp.o
+#20 55.62 [ 41%] Completed 'nvshmem_device_project'
+#20 55.96 [ 41%] Built target nvshmem_device_project
+#20 56.04 [ 41%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/fcollect/fcollect_on_stream.cpp.o
+#20 56.10 [ 41%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/rdxn/rdxn.cpp.o
+#20 56.54 [ 42%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/rdxn/rdxn_on_stream.cpp.o
+#20 56.87 [ 42%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/reducescatter/reducescatter.cpp.o
+#20 57.88 [ 42%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/coll/reducescatter/reducescatter_on_stream.cpp.o
+#20 58.03 [ 43%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/comm/putget.cpp.o
+#20 58.21 [ 43%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/comm/fence.cpp.o
+#20 58.32 [ 44%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/comm/quiet.cpp.o
+#20 59.40 [ 44%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/comm/sync.cpp.o
+#20 60.30 [ 44%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/comm/amo.cpp.o
+#20 60.38 [ 45%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/proxy/proxy.cpp.o
+#20 60.79 [ 45%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/transport/transport.cpp.o
+#20 60.79 [ 45%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/transport/p2p/p2p.cpp.o
+#20 61.52 [ 46%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/init/cudawrap.cpp.o
+#20 61.75 [ 46%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/init/init.cu.o
+#20 61.98 [ 46%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/init/init_nvtx.cpp.o
+#20 62.34 [ 47%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/init/nvmlwrap.cpp.o
+#20 62.48 [ 47%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/init/query_host.cpp.o
+#20 62.74 [ 47%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/mem/mem.cpp.o
+#20 63.22 [ 48%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/mem/mem_heap.cpp.o
+#20 63.61 [ 48%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/mem/mem_transport.cpp.o
+#20 63.93 [ 48%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/team/team.cu.o
+#20 64.35 [ 49%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/team/team_internal.cpp.o
+#20 64.37 [ 49%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/team/team_internal_cuda.cu.o
+#20 64.43 [ 49%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/team/team_internal_nvls.cpp.o
+#20 64.58 [ 50%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/topo/topo.cpp.o
+#20 64.61 [ 50%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/util/cs.cpp.o
+#20 64.81 [ 50%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/util/debug.cpp.o
+#20 64.90 [ 51%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/util/env_vars.cpp.o
+#20 65.50 [ 51%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/util/util.cpp.o
+#20 65.60 [ 51%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/util/sockets.cpp.o
+#20 65.62 [ 52%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/util/shared_memory.cpp.o
+#20 65.99 [ 52%] Building CXX object src/CMakeFiles/nvshmem_host.dir/host/mem/custom_malloc.cpp.o
+#20 66.05 [ 52%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/comm/rma.cu.o
+#20 66.18 [ 53%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/comm/quiet_on_stream.cu.o
+#20 66.35 [ 53%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/comm/cuda_interface_sync.cu.o
+#20 66.56 [ 53%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/alltoall/alltoall.cu.o
+#20 66.91 [ 54%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/barrier/barrier.cu.o
+#20 68.11 [ 54%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/broadcast/broadcast.cu.o
+#20 68.27 [ 54%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/fcollect/fcollect.cu.o
+#20 68.29 [ 55%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/rdxn/reduce_and.cu.o
+#20 68.32 [ 55%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/rdxn/reduce_or.cu.o
+#20 68.34 [ 55%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/rdxn/reduce_xor.cu.o
+#20 68.46 [ 56%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/rdxn/reduce_min.cu.o
+#20 70.06 [ 56%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/rdxn/reduce_max.cu.o
+#20 70.69 [ 56%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/rdxn/reduce_prod.cu.o
+#20 71.17 [ 57%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/rdxn/reduce_sum.cu.o
+#20 71.35 [ 57%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/rdxn/reduce_team.cu.o
+#20 71.42 [ 57%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/reducescatter/reducescatter_and.cu.o
+#20 72.25 [ 57%] Linking CXX static library lib/libnvshmem.a
+#20 72.82 [ 58%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/reducescatter/reducescatter_or.cu.o
+#20 74.55 [ 58%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/reducescatter/reducescatter_xor.cu.o
+#20 75.32 [ 58%] Built target nvshmem
+#20 75.48 [ 58%] Building CXX object src/CMakeFiles/nvshmem-info.dir/bin/nvshmem-info.cpp.o
+#20 76.73 [ 59%] Linking CUDA device code CMakeFiles/nvshmem-info.dir/cmake_device_link.o
+#20 77.45 [ 59%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/reducescatter/reducescatter_min.cu.o
+#20 80.19 [ 60%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/reducescatter/reducescatter_max.cu.o
+#20 81.18 [ 60%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/reducescatter/reducescatter_prod.cu.o
+#20 82.93 [ 60%] Building CUDA object src/CMakeFiles/nvshmem_host.dir/host/stream/coll/reducescatter/reducescatter_sum.cu.o
+#20 97.60 [ 60%] Linking CXX executable bin/nvshmem-info
+#20 98.74 [ 60%] Built target nvshmem-info
+#20 113.9 [ 61%] Linking CUDA device code CMakeFiles/nvshmem_host.dir/cmake_device_link.o
+#20 122.7 [ 61%] Linking CXX shared library lib/libnvshmem_host.so
+#20 123.4 [ 61%] Built target nvshmem_host
+#20 123.5 [ 61%] Building CUDA object perftest/common/CMakeFiles/nvshmem_perftest_helper.dir/utils.cu.o
+#20 128.7 [ 62%] Linking CUDA static library libnvshmem_perftest_helper.a
+#20 128.8 [ 62%] Built target nvshmem_perftest_helper
+#20 128.9 [ 62%] Building CUDA object perftest/device/coll/CMakeFiles/perf_device_bcast_latency.dir/bcast_latency.cu.o
+#20 128.9 [ 62%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_atomic_ping_pong_latency.dir/shmem_atomic_ping_pong_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/coll/CMakeFiles/perf_device_fcollect_latency.dir/fcollect_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/coll/CMakeFiles/perf_device_sync_latency.dir/sync_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/coll/CMakeFiles/perf_device_alltoall_latency.dir/alltoall_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_get_latency.dir/shmem_get_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_get_bw.dir/shmem_get_bw.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_g_bw.dir/shmem_g_bw.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_atomic_bw.dir/shmem_atomic_bw.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/coll/CMakeFiles/perf_device_barrier_latency.dir/barrier_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_g_latency.dir/shmem_g_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/coll/CMakeFiles/perf_device_reducescatter_latency.dir/reducescatter_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/coll/CMakeFiles/perf_device_reduction_latency.dir/reduction_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_p_latency.dir/shmem_p_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_atomic_latency.dir/shmem_atomic_latency.cu.o
+#20 128.9 [ 63%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_p_bw.dir/shmem_p_bw.cu.o
+#20 144.9 [ 64%] Linking CUDA device code CMakeFiles/perf_device_shmem_get_latency.dir/cmake_device_link.o
+#20 145.0 [ 65%] Linking CUDA device code CMakeFiles/perf_device_shmem_g_bw.dir/cmake_device_link.o
+#20 145.1 [ 66%] Linking CUDA device code CMakeFiles/perf_device_shmem_p_bw.dir/cmake_device_link.o
+#20 145.3 [ 67%] Linking CUDA device code CMakeFiles/perf_device_shmem_p_latency.dir/cmake_device_link.o
+#20 145.3 [ 68%] Linking CUDA device code CMakeFiles/perf_device_shmem_get_bw.dir/cmake_device_link.o
+#20 145.4 [ 69%] Linking CUDA device code CMakeFiles/perf_device_shmem_g_latency.dir/cmake_device_link.o
+#20 145.7 [ 70%] Linking CUDA device code CMakeFiles/perf_device_shmem_atomic_bw.dir/cmake_device_link.o
+#20 145.8 [ 70%] Linking CUDA device code CMakeFiles/perf_device_sync_latency.dir/cmake_device_link.o
+#20 145.9 [ 71%] Linking CUDA device code CMakeFiles/perf_device_barrier_latency.dir/cmake_device_link.o
+#20 146.1 [ 71%] Linking CUDA executable shmem_get_latency
+#20 146.1 [ 72%] Linking CUDA device code CMakeFiles/perf_device_alltoall_latency.dir/cmake_device_link.o
+#20 146.2 [ 72%] Linking CUDA executable shmem_g_bw
+#20 146.3 [ 72%] Linking CUDA executable shmem_p_bw
+#20 146.4 [ 72%] Linking CUDA executable shmem_p_latency
+#20 146.5 [ 72%] Built target perf_device_shmem_get_latency
+#20 146.5 [ 72%] Linking CUDA executable shmem_get_bw
+#20 146.5 [ 72%] Built target perf_device_shmem_g_bw
+#20 146.6 [ 72%] Linking CUDA executable shmem_g_latency
+#20 146.6 [ 72%] Built target perf_device_shmem_p_bw
+#20 146.7 [ 72%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_p_ping_pong_latency.dir/shmem_p_ping_pong_latency.cu.o
+#20 146.7 [ 72%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_put_atomic_ping_pong_latency.dir/shmem_put_atomic_ping_pong_latency.cu.o
+#20 146.8 [ 73%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_put_bw.dir/shmem_put_bw.cu.o
+#20 146.8 [ 73%] Built target perf_device_shmem_p_latency
+#20 146.8 [ 73%] Built target perf_device_shmem_get_bw
+#20 146.9 [ 73%] Linking CUDA executable shmem_atomic_bw
+#20 146.9 [ 73%] Built target perf_device_shmem_g_latency
+#20 146.9 [ 73%] Linking CUDA executable sync_latency
+#20 147.0 [ 74%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_put_latency.dir/shmem_put_latency.cu.o
+#20 147.0 [ 75%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_put_ping_pong_latency.dir/shmem_put_ping_pong_latency.cu.o
+#20 147.1 [ 75%] Linking CUDA executable barrier_latency
+#20 147.1 [ 76%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_put_signal_ping_pong_latency.dir/shmem_put_signal_ping_pong_latency.cu.o
+#20 147.3 [ 76%] Built target perf_device_shmem_atomic_bw
+#20 147.3 [ 76%] Built target perf_device_sync_latency
+#20 147.4 [ 76%] Linking CUDA executable alltoall_latency
+#20 147.5 [ 77%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_st_bw.dir/shmem_st_bw.cu.o
+#20 147.5 [ 78%] Building CUDA object perftest/device/pt-to-pt/CMakeFiles/perf_device_shmem_signal_ping_pong_latency.dir/shmem_signal_ping_pong_latency.cu.o
+#20 147.7 [ 78%] Built target perf_device_barrier_latency
+#20 147.9 [ 78%] Built target perf_device_alltoall_latency
+#20 147.9 [ 79%] Building CXX object perftest/host/coll/CMakeFiles/perf_host_alltoall_on_stream.dir/alltoall_on_stream.cpp.o
+#20 148.1 [ 80%] Building CXX object perftest/host/coll/CMakeFiles/perf_host_barrier_all_on_stream.dir/barrier_all_on_stream.cpp.o
+#20 148.7 [ 81%] Linking CUDA device code CMakeFiles/perf_device_bcast_latency.dir/cmake_device_link.o
+#20 148.8 [ 82%] Linking CUDA device code CMakeFiles/perf_device_shmem_atomic_ping_pong_latency.dir/cmake_device_link.o
+#20 148.9 [ 83%] Linking CUDA device code CMakeFiles/perf_device_shmem_atomic_latency.dir/cmake_device_link.o
+#20 149.4 [ 83%] Linking CUDA device code CMakeFiles/perf_host_barrier_all_on_stream.dir/cmake_device_link.o
+#20 149.5 [ 83%] Linking CUDA device code CMakeFiles/perf_host_alltoall_on_stream.dir/cmake_device_link.o
+#20 150.0 [ 83%] Linking CUDA executable bcast_latency
+#20 150.1 [ 83%] Linking CUDA executable shmem_atomic_ping_pong_latency
+#20 150.1 [ 83%] Linking CUDA executable shmem_atomic_latency
+#20 150.4 [ 83%] Built target perf_device_shmem_atomic_ping_pong_latency
+#20 150.5 [ 83%] Built target perf_device_bcast_latency
+#20 150.6 [ 83%] Linking CXX executable alltoall_on_stream
+#20 150.6 [ 84%] Building CXX object perftest/host/coll/CMakeFiles/perf_host_barrier_on_stream.dir/barrier_on_stream.cpp.o
+#20 150.6 [ 84%] Linking CXX executable barrier_all_on_stream
+#20 150.6 [ 84%] Built target perf_device_shmem_atomic_latency
+#20 150.7 [ 85%] Building CXX object perftest/host/coll/CMakeFiles/perf_host_broadcast_on_stream.dir/broadcast_on_stream.cpp.o
+#20 150.7 [ 86%] Linking CUDA device code CMakeFiles/perf_device_fcollect_latency.dir/cmake_device_link.o
+#20 150.8 [ 87%] Building CXX object perftest/host/coll/CMakeFiles/perf_host_fcollect_on_stream.dir/fcollect_on_stream.cpp.o
+#20 151.0 [ 87%] Built target perf_host_alltoall_on_stream
+#20 151.1 [ 87%] Built target perf_host_barrier_all_on_stream
+#20 151.2 [ 88%] Building CXX object perftest/host/coll/CMakeFiles/perf_host_reduction_on_stream.dir/reduction_on_stream.cpp.o
+#20 151.3 [ 89%] Building CXX object perftest/host/coll/CMakeFiles/perf_host_reducescatter_on_stream.dir/reducescatter_on_stream.cpp.o
+#20 152.2 [ 90%] Linking CUDA device code CMakeFiles/perf_device_reducescatter_latency.dir/cmake_device_link.o
+#20 152.3 [ 90%] Linking CUDA device code CMakeFiles/perf_host_barrier_on_stream.dir/cmake_device_link.o
+#20 152.5 [ 90%] Linking CUDA executable fcollect_latency
+#20 152.7 [ 90%] Linking CUDA device code CMakeFiles/perf_host_broadcast_on_stream.dir/cmake_device_link.o
+#20 152.9 [ 90%] Built target perf_device_fcollect_latency
+#20 153.1 [ 91%] Building CXX object perftest/host/coll/CMakeFiles/perf_host_sync_all_on_stream.dir/sync_all_on_stream.cpp.o
+#20 153.2 [ 91%] Linking CUDA device code CMakeFiles/perf_host_fcollect_on_stream.dir/cmake_device_link.o
+#20 153.5 [ 91%] Linking CXX executable barrier_on_stream
+#20 153.9 [ 91%] Built target perf_host_barrier_on_stream
+#20 154.0 [ 91%] Linking CUDA device code CMakeFiles/perf_host_reduction_on_stream.dir/cmake_device_link.o
+#20 154.2 [ 92%] Building CXX object perftest/host/coll/CMakeFiles/perf_host_sync_on_stream.dir/sync_on_stream.cpp.o
+#20 154.3 [ 92%] Linking CUDA device code CMakeFiles/perf_host_reducescatter_on_stream.dir/cmake_device_link.o
+#20 154.3 [ 92%] Linking CXX executable broadcast_on_stream
+#20 154.5 [ 92%] Linking CUDA executable reducescatter_latency
+#20 154.8 [ 92%] Built target perf_host_broadcast_on_stream
+#20 154.8 [ 92%] Linking CXX executable fcollect_on_stream
+#20 155.0 [ 93%] Building CXX object perftest/host/init/CMakeFiles/perf_host_malloc.dir/malloc.cpp.o
+#20 155.0 [ 93%] Built target perf_device_reducescatter_latency
+#20 155.1 [ 93%] Linking CUDA device code CMakeFiles/perf_host_sync_all_on_stream.dir/cmake_device_link.o
+#20 155.2 [ 94%] Building CXX object perftest/host/pt-to-pt/CMakeFiles/perf_host_bw.dir/bw.cpp.o
+#20 155.2 [ 94%] Built target perf_host_fcollect_on_stream
+#20 155.4 [ 95%] Building CXX object perftest/host/pt-to-pt/CMakeFiles/perf_host_latency.dir/latency.cpp.o
+#20 155.6 [ 95%] Linking CXX executable reduction_on_stream
+#20 155.6 [ 95%] Linking CUDA device code CMakeFiles/perf_host_sync_on_stream.dir/cmake_device_link.o
+#20 155.8 [ 95%] Linking CXX executable reducescatter_on_stream
+#20 155.9 [ 95%] Built target perf_host_reduction_on_stream
+#20 156.1 [ 96%] Building CUDA object perftest/host/pt-to-pt/CMakeFiles/perf_host_stream_latency.dir/stream_latency.cu.o
+#20 156.2 [ 96%] Built target perf_host_reducescatter_on_stream
+#20 156.5 [ 96%] Linking CXX executable sync_all_on_stream
+#20 156.8 [ 96%] Linking CUDA device code CMakeFiles/perf_host_malloc.dir/cmake_device_link.o
+#20 156.8 [ 96%] Built target perf_host_sync_all_on_stream
+#20 157.0 [ 97%] Linking CXX executable sync_on_stream
+#20 157.1 [ 97%] Linking CUDA device code CMakeFiles/perf_host_latency.dir/cmake_device_link.o
+#20 157.2 [ 97%] Linking CUDA device code CMakeFiles/perf_host_bw.dir/cmake_device_link.o
+#20 157.4 [ 97%] Built target perf_host_sync_on_stream
+#20 157.9 [ 97%] Linking CXX executable malloc
+#20 158.1 [ 97%] Linking CXX executable bw
+#20 158.1 [ 97%] Built target perf_host_malloc
+#20 158.2 [ 97%] Linking CXX executable latency
+#20 158.3 [ 97%] Built target perf_host_bw
+#20 158.4 [ 97%] Built target perf_host_latency
+#20 158.8 [ 97%] Linking CUDA device code CMakeFiles/perf_device_shmem_put_latency.dir/cmake_device_link.o
+#20 158.9 [ 98%] Linking CUDA device code CMakeFiles/perf_device_shmem_p_ping_pong_latency.dir/cmake_device_link.o
+#20 158.9 [ 98%] Linking CUDA device code CMakeFiles/perf_device_shmem_put_signal_ping_pong_latency.dir/cmake_device_link.o
+#20 159.0 [ 99%] Linking CUDA device code CMakeFiles/perf_device_shmem_put_atomic_ping_pong_latency.dir/cmake_device_link.o
+#20 159.0 [ 99%] Linking CUDA device code CMakeFiles/perf_device_shmem_signal_ping_pong_latency.dir/cmake_device_link.o
+#20 159.0 [ 99%] Linking CUDA device code CMakeFiles/perf_device_shmem_st_bw.dir/cmake_device_link.o
+#20 159.2 [ 99%] Linking CUDA device code CMakeFiles/perf_device_shmem_put_ping_pong_latency.dir/cmake_device_link.o
+#20 159.4 [ 99%] Linking CUDA device code CMakeFiles/perf_device_shmem_put_bw.dir/cmake_device_link.o
+#20 159.5 [ 99%] Linking CUDA executable shmem_put_latency
+#20 159.5 [ 99%] Linking CUDA executable shmem_p_ping_pong_latency
+#20 159.6 [ 99%] Linking CUDA executable shmem_signal_ping_pong_latency
+#20 159.6 [ 99%] Linking CUDA executable shmem_put_signal_ping_pong_latency
+#20 159.6 [ 99%] Linking CUDA executable shmem_put_atomic_ping_pong_latency
+#20 159.6 [ 99%] Built target perf_device_shmem_put_latency
+#20 159.7 [ 99%] Linking CUDA executable shmem_st_bw
+#20 159.8 [ 99%] Built target perf_device_shmem_p_ping_pong_latency
+#20 159.8 [ 99%] Built target perf_device_shmem_put_signal_ping_pong_latency
+#20 159.8 [ 99%] Built target perf_device_shmem_signal_ping_pong_latency
+#20 159.8 [ 99%] Built target perf_device_shmem_put_atomic_ping_pong_latency
+#20 159.9 [ 99%] Linking CUDA executable shmem_put_ping_pong_latency
+#20 159.9 [ 99%] Built target perf_device_shmem_st_bw
+#20 160.0 [ 99%] Built target perf_device_shmem_put_ping_pong_latency
+#20 160.0 [ 99%] Linking CUDA executable shmem_put_bw
+#20 160.2 [ 99%] Built target perf_device_shmem_put_bw
+#20 162.8 [ 99%] Linking CUDA device code CMakeFiles/perf_host_stream_latency.dir/cmake_device_link.o
+#20 163.3 [ 99%] Linking CUDA executable stream_latency
+#20 163.5 [ 99%] Built target perf_host_stream_latency
+#20 187.1 [100%] Linking CUDA device code CMakeFiles/perf_device_reduction_latency.dir/cmake_device_link.o
+#20 189.5 [100%] Linking CUDA executable reduction_latency
+#20 189.7 [100%] Built target perf_device_reduction_latency
+#20 189.8 [  0%] Performing build step for 'nvshmem_device_project'
+#20 189.9 [100%] Built target nvshmem_device
+#20 189.9 [  2%] Built target nvshmem_device_project-build
+#20 190.0 [  2%] Performing install step for 'nvshmem_device_project'
+#20 190.1 [100%] Built target nvshmem_device
+#20 190.1 Install the project...
+#20 190.1 -- Install configuration: "debug"
+#20 190.1 -- Up-to-date: /nvshmem_src/build/src/device/../../lib/cmake/nvshmem/NVSHMEMDeviceTargets.cmake
+#20 190.1 -- Up-to-date: /nvshmem_src/build/src/device/../../lib/cmake/nvshmem/NVSHMEMDeviceTargets-debug.cmake
+#20 190.1 -- Up-to-date: /nvshmem_src/build/src/device/../../lib/libnvshmem_device.a
+#20 190.1 [  2%] Built target nvshmem_device_project-install
+#20 190.2 [  2%] Completed 'nvshmem_device_project'
+#20 190.3 [  2%] Built target nvshmem_device_project
+#20 190.3 [  4%] Built target nvshmem_bootstrap_pmi
+#20 190.4 [  5%] Built target nvshmem_bootstrap_pmi2
+#20 190.4 [  6%] Built target nvshmem_bootstrap_pmix
+#20 190.5 [  7%] Built target nvshmem_bootstrap_mpi
+#20 190.5 [  9%] Built target nvshmem_bootstrap_uid
+#20 190.7 [ 32%] Built target nvshmem
+#20 190.9 [ 55%] Built target nvshmem_host
+#20 191.0 [ 57%] Built target nvshmem_transport_ibrc
+#20 191.1 [ 59%] Built target nvshmem_transport_ibgda
+#20 191.1 [ 60%] Built target nvshmem_transport_libfabric
+#20 191.2 [ 61%] Built target nvshmem-info
+#20 191.3 [ 61%] Built target git_commit
+#20 191.4 [ 62%] Built target nvshmem_perftest_helper
+#20 191.4 [ 63%] Built target perf_device_alltoall_latency
+#20 191.5 [ 64%] Built target perf_device_barrier_latency
+#20 191.5 [ 65%] Built target perf_device_bcast_latency
+#20 191.6 [ 66%] Built target perf_device_fcollect_latency
+#20 191.7 [ 67%] Built target perf_device_reducescatter_latency
+#20 191.7 [ 68%] Built target perf_device_reduction_latency
+#20 191.8 [ 69%] Built target perf_device_sync_latency
+#20 191.8 [ 70%] Built target perf_device_shmem_atomic_bw
+#20 191.9 [ 71%] Built target perf_device_shmem_atomic_latency
+#20 191.9 [ 72%] Built target perf_device_shmem_atomic_ping_pong_latency
+#20 192.0 [ 73%] Built target perf_device_shmem_g_bw
+#20 192.1 [ 74%] Built target perf_device_shmem_g_latency
+#20 192.1 [ 75%] Built target perf_device_shmem_get_bw
+#20 192.2 [ 76%] Built target perf_device_shmem_get_latency
+#20 192.2 [ 77%] Built target perf_device_shmem_p_bw
+#20 192.3 [ 78%] Built target perf_device_shmem_p_latency
+#20 192.3 [ 79%] Built target perf_device_shmem_p_ping_pong_latency
+#20 192.4 [ 80%] Built target perf_device_shmem_put_atomic_ping_pong_latency
+#20 192.5 [ 81%] Built target perf_device_shmem_put_bw
+#20 192.5 [ 82%] Built target perf_device_shmem_put_latency
+#20 192.6 [ 83%] Built target perf_device_shmem_put_ping_pong_latency
+#20 192.6 [ 84%] Built target perf_device_shmem_put_signal_ping_pong_latency
+#20 192.7 [ 85%] Built target perf_device_shmem_signal_ping_pong_latency
+#20 192.7 [ 86%] Built target perf_device_shmem_st_bw
+#20 192.8 [ 87%] Built target perf_host_alltoall_on_stream
+#20 192.8 [ 88%] Built target perf_host_barrier_all_on_stream
+#20 192.9 [ 89%] Built target perf_host_barrier_on_stream
+#20 192.9 [ 90%] Built target perf_host_broadcast_on_stream
+#20 193.0 [ 91%] Built target perf_host_fcollect_on_stream
+#20 193.0 [ 92%] Built target perf_host_reduction_on_stream
+#20 193.1 [ 93%] Built target perf_host_reducescatter_on_stream
+#20 193.1 [ 94%] Built target perf_host_sync_all_on_stream
+#20 193.2 [ 96%] Built target perf_host_sync_on_stream
+#20 193.2 [ 97%] Built target perf_host_malloc
+#20 193.3 [ 98%] Built target perf_host_bw
+#20 193.3 [ 99%] Built target perf_host_latency
+#20 193.4 [100%] Built target perf_host_stream_latency
+#20 193.4 Install the project...
+#20 193.4 -- Install configuration: "debug"
+#20 193.4 -- Installing: /nvshmem_src/perftest/perftest_install/device/coll/alltoall_latency
+#20 193.4 -- Installing: /opt/nvshmem/bin/perftest/device/coll/alltoall_latency
+#20 193.5 -- Installing: /nvshmem_src/perftest/perftest_install/device/coll/barrier_latency
+#20 193.5 -- Installing: /opt/nvshmem/bin/perftest/device/coll/barrier_latency
+#20 193.5 -- Installing: /nvshmem_src/perftest/perftest_install/device/coll/bcast_latency
+#20 193.5 -- Installing: /opt/nvshmem/bin/perftest/device/coll/bcast_latency
+#20 193.5 -- Installing: /nvshmem_src/perftest/perftest_install/device/coll/fcollect_latency
+#20 193.5 -- Installing: /opt/nvshmem/bin/perftest/device/coll/fcollect_latency
+#20 193.5 -- Installing: /nvshmem_src/perftest/perftest_install/device/coll/reducescatter_latency
+#20 193.5 -- Installing: /opt/nvshmem/bin/perftest/device/coll/reducescatter_latency
+#20 193.5 -- Installing: /nvshmem_src/perftest/perftest_install/device/coll/reduction_latency
+#20 193.6 -- Installing: /opt/nvshmem/bin/perftest/device/coll/reduction_latency
+#20 193.6 -- Installing: /nvshmem_src/perftest/perftest_install/device/coll/sync_latency
+#20 193.6 -- Installing: /opt/nvshmem/bin/perftest/device/coll/sync_latency
+#20 193.7 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_atomic_bw
+#20 193.7 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_atomic_bw
+#20 193.7 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_atomic_latency
+#20 193.7 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_atomic_latency
+#20 193.7 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_atomic_ping_pong_latency
+#20 193.7 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_atomic_ping_pong_latency
+#20 193.7 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_g_bw
+#20 193.7 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_g_bw
+#20 193.8 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_g_latency
+#20 193.8 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_g_latency
+#20 193.8 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_get_bw
+#20 193.8 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_get_bw
+#20 193.8 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_get_latency
+#20 193.8 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_get_latency
+#20 193.8 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_p_bw
+#20 193.8 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_p_bw
+#20 193.8 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_p_latency
+#20 193.8 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_p_latency
+#20 193.8 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_p_ping_pong_latency
+#20 193.8 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_p_ping_pong_latency
+#20 193.9 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_put_atomic_ping_pong_latency
+#20 193.9 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_put_atomic_ping_pong_latency
+#20 193.9 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_put_bw
+#20 193.9 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_put_bw
+#20 193.9 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_put_latency
+#20 193.9 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_put_latency
+#20 193.9 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_put_ping_pong_latency
+#20 193.9 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_put_ping_pong_latency
+#20 193.9 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_put_signal_ping_pong_latency
+#20 193.9 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_put_signal_ping_pong_latency
+#20 193.9 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_signal_ping_pong_latency
+#20 193.9 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_signal_ping_pong_latency
+#20 193.9 -- Installing: /nvshmem_src/perftest/perftest_install/device/pt-to-pt/shmem_st_bw
+#20 194.0 -- Installing: /opt/nvshmem/bin/perftest/device/pt-to-pt/shmem_st_bw
+#20 194.0 -- Installing: /nvshmem_src/perftest/perftest_install/host/coll/alltoall_on_stream
+#20 194.0 -- Installing: /opt/nvshmem/bin/perftest/host/coll/alltoall_on_stream
+#20 194.0 -- Installing: /nvshmem_src/perftest/perftest_install/host/coll/barrier_all_on_stream
+#20 194.0 -- Installing: /opt/nvshmem/bin/perftest/host/coll/barrier_all_on_stream
+#20 194.0 -- Installing: /nvshmem_src/perftest/perftest_install/host/coll/barrier_on_stream
+#20 194.0 -- Installing: /opt/nvshmem/bin/perftest/host/coll/barrier_on_stream
+#20 194.0 -- Installing: /nvshmem_src/perftest/perftest_install/host/coll/broadcast_on_stream
+#20 194.0 -- Installing: /opt/nvshmem/bin/perftest/host/coll/broadcast_on_stream
+#20 194.0 -- Installing: /nvshmem_src/perftest/perftest_install/host/coll/fcollect_on_stream
+#20 194.0 -- Installing: /opt/nvshmem/bin/perftest/host/coll/fcollect_on_stream
+#20 194.0 -- Installing: /nvshmem_src/perftest/perftest_install/host/coll/reduction_on_stream
+#20 194.0 -- Installing: /opt/nvshmem/bin/perftest/host/coll/reduction_on_stream
+#20 194.1 -- Installing: /nvshmem_src/perftest/perftest_install/host/coll/reducescatter_on_stream
+#20 194.1 -- Installing: /opt/nvshmem/bin/perftest/host/coll/reducescatter_on_stream
+#20 194.1 -- Installing: /nvshmem_src/perftest/perftest_install/host/coll/sync_all_on_stream
+#20 194.1 -- Installing: /opt/nvshmem/bin/perftest/host/coll/sync_all_on_stream
+#20 194.1 -- Installing: /nvshmem_src/perftest/perftest_install/host/coll/sync_on_stream
+#20 194.1 -- Installing: /opt/nvshmem/bin/perftest/host/coll/sync_on_stream
+#20 194.1 -- Installing: /nvshmem_src/perftest/perftest_install/host/init/malloc
+#20 194.1 -- Installing: /opt/nvshmem/bin/perftest/host/init/malloc
+#20 194.1 -- Installing: /nvshmem_src/perftest/perftest_install/host/pt-to-pt/bw
+#20 194.1 -- Installing: /opt/nvshmem/bin/perftest/host/pt-to-pt/bw
+#20 194.1 -- Installing: /nvshmem_src/perftest/perftest_install/host/pt-to-pt/latency
+#20 194.1 -- Installing: /opt/nvshmem/bin/perftest/host/pt-to-pt/latency
+#20 194.1 -- Installing: /nvshmem_src/perftest/perftest_install/host/pt-to-pt/stream_latency
+#20 194.2 -- Installing: /opt/nvshmem/bin/perftest/host/pt-to-pt/stream_latency
+#20 194.2 -- Processing targets_file=/nvshmem_src/build/src/CMakeFiles/Export/349c4207c73d73c1c906d2815d8ce9c4/NVSHMEMTargets-debug.cmake
+#20 194.2 -- Processing targets_file=/nvshmem_src/build/src/CMakeFiles/Export/349c4207c73d73c1c906d2815d8ce9c4/NVSHMEMTargets.cmake
+#20 194.2 -- Processing targets_file=/nvshmem_src/build/lib/cmake/nvshmem/NVSHMEMDeviceTargets-debug.cmake
+#20 194.2 -- Processing targets_file=/nvshmem_src/build/lib/cmake/nvshmem/NVSHMEMDeviceTargets.cmake
+#20 194.2 -- Installing: /opt/nvshmem/lib/cmake/nvshmem/NVSHMEMTargets.cmake
+#20 194.2 -- Installing: /opt/nvshmem/lib/cmake/nvshmem/NVSHMEMTargets-debug.cmake
+#20 194.2 -- Installing: /opt/nvshmem/lib/cmake/nvshmem/NVSHMEMVersion.cmake
+#20 194.2 -- Installing: /opt/nvshmem/lib/cmake/nvshmem/NVSHMEMConfig.cmake
+#20 194.2 -- Installing: /opt/nvshmem/lib/libnvshmem.a
+#20 194.4 -- Installing: /opt/nvshmem/lib/libnvshmem_host.so.3.2.5
+#20 194.6 -- Installing: /opt/nvshmem/lib/libnvshmem_host.so.3
+#20 194.6 -- Installing: /opt/nvshmem/lib/libnvshmem_host.so
+#20 194.6 -- Installing: /opt/nvshmem/bin/nvshmem-info
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_pmi.so.3.0.0
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_pmi.so.3
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_pmi.so
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_pmi2.so.3.0.0
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_pmi2.so.3
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_pmi2.so
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_pmix.so.3.0.0
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_pmix.so.3
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_pmix.so
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_mpi.so.3.0.0
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_mpi.so.3
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_mpi.so
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_uid.so.3.0.0
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_uid.so.3
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_bootstrap_uid.so
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_transport_ibrc.so.3.0.0
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_transport_ibrc.so.3
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_transport_ibrc.so
+#20 194.7 -- Installing: /opt/nvshmem/lib/nvshmem_transport_ibgda.so.3.0.0
+#20 194.8 -- Installing: /opt/nvshmem/lib/nvshmem_transport_ibgda.so.3
+#20 194.8 -- Installing: /opt/nvshmem/lib/nvshmem_transport_ibgda.so
+#20 194.8 -- Installing: /opt/nvshmem/lib/nvshmem_transport_libfabric.so.3.0.0
+#20 194.8 -- Installing: /opt/nvshmem/lib/nvshmem_transport_libfabric.so.3
+#20 194.8 -- Installing: /opt/nvshmem/lib/nvshmem_transport_libfabric.so
+#20 194.8 -- Installing: /opt/nvshmem/lib/libnvshmem_device.a
+#20 194.8 -- Installing: /opt/nvshmem/lib/cmake/nvshmem/NVSHMEMDeviceTargets.cmake
+#20 194.8 -- Installing: /opt/nvshmem/lib/cmake/nvshmem/NVSHMEMDeviceTargets-debug.cmake
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_pmix.so.3.0.0
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_transport_ibgda.so.3.0.0
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_mpi.so.3
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_pmi2.so.3.0.0
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/libnvshmem_host.so.3
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_uid.so.3.0.0
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_pmix.so.3
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_transport_ibgda.so.3
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_pmi.so.3.0.0
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_uid.so
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_transport_libfabric.so
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_transport_ibrc.so.3.0.0
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_transport_ibrc.so
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_mpi.so.3.0.0
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_pmi2.so
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/libnvshmem_device.a
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/libnvshmem.a
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_transport_ibrc.so.3
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/libnvshmem_host.so
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_mpi.so
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_transport_libfabric.so.3.0.0
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/libnvshmem_host.so.3.2.5
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_pmi.so.3
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_transport_libfabric.so.3
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_pmi2.so.3
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_pmi.so
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_uid.so.3
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_transport_ibgda.so
+#20 194.8 -- Up-to-date: /opt/nvshmem/lib/nvshmem_bootstrap_pmix.so
+#20 194.8 -- Up-to-date: /opt/nvshmem/bin
+#20 194.8 -- Up-to-date: /opt/nvshmem/bin/nvshmem-info
+#20 194.8 -- Installing: /opt/nvshmem/share/src/
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/device_host_transport
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/device_host_transport/nvshmem_constants.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/device_host_transport/nvshmem_common_transport.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/device_host_transport/nvshmem_common_ibgda.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/internal
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/internal/host_transport
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/internal/host_transport/transport.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/internal/host_transport/cudawrap.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/internal/host_transport/nvshmemi_transport_defines.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/internal/bootstrap_host_transport
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/internal/bootstrap_host_transport/nvshmemi_bootstrap_defines.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/bootstrap_host_transport
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/bootstrap_host_transport/env_defs_internal.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/non_abi
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/non_abi/nvshmem_version.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/non_abi/nvshmemx_error.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/include/non_abi/nvshmem_build_options.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ibrc
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ibrc/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ibrc/ibrc.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ucx
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ucx/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ucx/ucx.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ucx/ucx.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/nvshmem_transport.sym
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ibdevx
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ibdevx/ibdevx.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ibdevx/ibdevx.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ibdevx/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/libfabric
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/libfabric/libfabric.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/libfabric/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/libfabric/libfabric.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/mlx5_prm.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/transport_common.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/transport_gdr_common.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/env_defs.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/mlx5_ifc.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/transport_mlx5_common.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/transport_mlx5_common.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/transport_ib_common.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/transport_ib_common.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/transport_gdr_common.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/common/transport_common.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ibgda
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ibgda/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//transport-plugins/ibgda/ibgda.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/bootstrap_device_host
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/bootstrap_device_host/nvshmem_uniqueid.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/internal
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/internal/bootstrap_host_transport
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/internal/bootstrap_host_transport/nvshmemi_bootstrap_defines.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/internal/bootstrap_host
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/internal/bootstrap_host/nvshmemi_bootstrap.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/bootstrap_host_transport
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/bootstrap_host_transport/env_defs_internal.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/non_abi
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/non_abi/nvshmem_version.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/include/non_abi/nvshmemx_error.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/common
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/common/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/common/bootstrap_util.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/common/env_defs.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/common/bootstrap_util.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/pmi
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/pmi/bootstrap_pmi.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/pmi/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/shmem
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/shmem/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/shmem/bootstrap_shmem.c
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/mpi
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/mpi/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/mpi/bootstrap_mpi.c
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/bootstrap_uid.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/bootstrap_uid_types.hpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/bootstrap_uid_remap.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/ncclSocket
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/ncclSocket/ncclsocket_debug.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/ncclSocket/ncclsocket_checks.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/ncclSocket/ncclsocket_utils.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/ncclSocket/ncclsocket_socket.hpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/ncclSocket/ncclsocket_param.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/ncclSocket/ncclsocket_nccl.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/uid/ncclSocket/ncclsocket_socket.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/nvshmem_bootstrap.sym
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/pmix
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/pmix/bootstrap_pmix.c
+#20 194.8 -- Installing: /opt/nvshmem/share/src//bootstrap-plugins/pmix/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/include/
+#20 194.8 -- Installing: /opt/nvshmem/include//device_host_transport
+#20 194.8 -- Installing: /opt/nvshmem/include//device_host_transport/nvshmem_constants.h
+#20 194.8 -- Installing: /opt/nvshmem/include//device_host_transport/nvshmem_common_transport.h
+#20 194.8 -- Installing: /opt/nvshmem/include//device_host_transport/nvshmem_common_ibgda.h
+#20 194.8 -- Installing: /opt/nvshmem/include//device_host
+#20 194.8 -- Installing: /opt/nvshmem/include//device_host/nvshmem_common.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//device_host/nvshmem_proxy_channel.h
+#20 194.8 -- Installing: /opt/nvshmem/include//device_host/nvshmem_types.h
+#20 194.8 -- Installing: /opt/nvshmem/include//bootstrap_device_host
+#20 194.8 -- Installing: /opt/nvshmem/include//bootstrap_device_host/nvshmem_uniqueid.h
+#20 194.8 -- Installing: /opt/nvshmem/include//device
+#20 194.8 -- Installing: /opt/nvshmem/include//device/nvshmem_coll_defines.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//device/nvshmemx_defines.h
+#20 194.8 -- Installing: /opt/nvshmem/include//device/nvshmem_defines.h
+#20 194.8 -- Installing: /opt/nvshmem/include//device/nvshmemx_coll_defines.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//device/nvshmemx_collective_launch_apis.h
+#20 194.8 -- Installing: /opt/nvshmem/include//device/nvshmem_device_macros.h
+#20 194.8 -- Installing: /opt/nvshmem/include//host
+#20 194.8 -- Installing: /opt/nvshmem/include//host/nvshmemx_api.h
+#20 194.8 -- Installing: /opt/nvshmem/include//host/nvshmem_api.h
+#20 194.8 -- Installing: /opt/nvshmem/include//host/nvshmem_macros.h
+#20 194.8 -- Installing: /opt/nvshmem/include//host/nvshmem_coll_api.h
+#20 194.8 -- Installing: /opt/nvshmem/include//host/nvshmemx_coll_api.h
+#20 194.8 -- Installing: /opt/nvshmem/include//nvshmemx.h
+#20 194.8 -- Installing: /opt/nvshmem/include//nvshmem.h
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/nvshmem_version.h
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/coll
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/coll/reduce.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/coll/utils.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/coll/alltoall.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/coll/fcollect.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/coll/broadcast.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/coll/reducescatter.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/coll/barrier.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/coll/defines.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/pt-to-pt
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/pt-to-pt/nvshmemi_transfer_api.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/pt-to-pt/ibgda_device.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/pt-to-pt/proxy_device.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/pt-to-pt/utils_device.h
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/team
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/team/nvshmemi_team_defines.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/common
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/common/nvshmemi_common_device.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/threadgroup
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/threadgroup/nvshmemi_common_device_defines.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/wait
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/device/wait/nvshmemi_wait_until_apis.cuh
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/nvshmemx_error.h
+#20 194.8 -- Installing: /opt/nvshmem/include//non_abi/nvshmem_build_options.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples/
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//on-stream.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//dev-guide-ring-mpi.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//put-block.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//bootstrap_helper.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//thread-group.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//hello.cpp
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//dev-guide-ring.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//moe_shuffle.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//uid-based-init.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//mpi-based-init.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//ring-bcast.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//collective-launch.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//shmem-based-init.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/examples//ring-reduce.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest/
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/reduction_latency.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/barrier_latency.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/reduction_latency.args
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/coll_test.h
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/sync_latency.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/sync_latency.args
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/CMakeLists.txt
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/fcollect_latency.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/bcast_latency.args
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/redmaxloc_latency.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/alltoall_latency.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/fcollect_latency.args
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/reducescatter_latency.args
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/alltoall_latency.args
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/reducescatter_latency.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/bcast_latency.cu
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/coll/barrier_latency.args
+#20 194.8 -- Installing: /opt/nvshmem/share/src/perftest//device/CMakeLists.txt
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_get_bw.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_get_bw.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_put_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_signal_ping_pong_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_g_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_g_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_p_bw.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_put_bw.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_p_ping_pong_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_st_bw.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/CMakeLists.txt
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_get_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_put_atomic_ping_pong_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_put_signal_ping_pong_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_put_ping_pong_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_put_ping_pong_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_signal_ping_pong_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_atomic_bw.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_st_bw.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_get_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_put_signal_ping_pong_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_p_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_g_bw.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_atomic_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_atomic_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_p_bw.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_atomic_ping_pong_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_atomic_bw.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_put_bw.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_put_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_atomic_ping_pong_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_g_bw.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_p_ping_pong_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//device/pt-to-pt/shmem_p_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/sync_on_stream.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/reducescatter_on_stream.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/barrier_on_stream.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/coll_test.h
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/barrier_all_on_stream.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/fcollect_on_stream.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/CMakeLists.txt
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/broadcast_on_stream.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/reduction_on_stream.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/sync_all_on_stream.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/broadcast_on_stream.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/fcollect_on_stream.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/barrier_on_stream.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/alltoall_on_stream.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/reduction_on_stream.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/sync_on_stream.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/reducescatter_on_stream.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/coll/alltoall_on_stream.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/CMakeLists.txt
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/pt-to-pt
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/pt-to-pt/bw.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/pt-to-pt/CMakeLists.txt
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/pt-to-pt/latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/pt-to-pt/bw.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/pt-to-pt/latency.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/pt-to-pt/stream_latency.args
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/pt-to-pt/stream_latency.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/init
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/init/CMakeLists.txt
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//host/init/malloc.cpp
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//CMakeLists.txt
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//common
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//common/atomic_bw_common.h
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//common/atomic_ping_pong_common.h
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//common/CMakeLists.txt
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//common/utils.cu
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//common/utils.h
+#20 194.9 -- Installing: /opt/nvshmem/share/src/perftest//common/atomic_one_sided_common.h
+#20 194.9 -- Installing: /opt/nvshmem/./changelog
+#20 194.9 -- Installing: /opt/nvshmem/./License.txt
+#20 194.9 -- Installing: /opt/nvshmem/./version.txt
+#20 194.9 -- Installing: /opt/nvshmem/./git_commit.txt
+#20 DONE 208.5s
+
+#21 [18/20] RUN git clone --depth 1 --branch main https://github.com/deepseek-ai/DeepEP.git /opt/DeepEP-src
+#21 0.327 Cloning into '/opt/DeepEP-src'...
+#21 DONE 1.2s
+
+#22 [19/20] WORKDIR /opt/DeepEP-src
+#22 DONE 0.0s
+
+#23 [20/20] RUN python3 -m pip install -v -e .  # builds CUDA extensions with SM90-only targets
+#23 0.815 Using pip 25.2 from /usr/local/lib/python3.12/dist-packages/pip (python 3.12)
+#23 0.947 Obtaining file:///opt/DeepEP-src
+#23 0.948   Preparing metadata (setup.py): started
+#23 0.948   Running command python setup.py egg_info
+#23 3.180   No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+#23 3.274   Build summary:
+#23 3.274    > Sources: ['csrc/deep_ep.cpp', 'csrc/kernels/runtime.cu', 'csrc/kernels/layout.cu', 'csrc/kernels/intranode.cu', 'csrc/kernels/internode.cu', 'csrc/kernels/internode_ll.cu']
+#23 3.274    > Includes: ['csrc/', '/opt/nvshmem/include']
+#23 3.274    > Libraries: ['/opt/nvshmem/lib']
+#23 3.274    > Compilation flags: {'cxx': ['-O3', '-Wno-deprecated-declarations', '-Wno-unused-variable', '-Wno-sign-compare', '-Wno-reorder', '-Wno-attributes', '-DDISABLE_AGGRESSIVE_PTX_INSTRS'], 'nvcc': ['-O3', '-Xcompiler', '-O3', '-rdc=true', '--ptxas-options=--register-usage-level=10', '-DDISABLE_AGGRESSIVE_PTX_INSTRS'], 'nvcc_dlink': ['-dlink', '-L/opt/nvshmem/lib', '-lnvshmem_device']}
+#23 3.275    > Link flags: ['-l:libnvshmem_host.so', '-l:libnvshmem_device.a', '-Wl,-rpath,/opt/nvshmem/lib']
+#23 3.275    > Arch list: 9.0+PTX
+#23 3.275    > NVSHMEM path: /opt/nvshmem
+#23 3.275 
+#23 3.275   running egg_info
+#23 3.290   creating /tmp/pip-pip-egg-info-qba9u9ok/deep_ep.egg-info
+#23 3.291   writing /tmp/pip-pip-egg-info-qba9u9ok/deep_ep.egg-info/PKG-INFO
+#23 3.291   writing dependency_links to /tmp/pip-pip-egg-info-qba9u9ok/deep_ep.egg-info/dependency_links.txt
+#23 3.291   writing top-level names to /tmp/pip-pip-egg-info-qba9u9ok/deep_ep.egg-info/top_level.txt
+#23 3.291   writing manifest file '/tmp/pip-pip-egg-info-qba9u9ok/deep_ep.egg-info/SOURCES.txt'
+#23 3.344   reading manifest file '/tmp/pip-pip-egg-info-qba9u9ok/deep_ep.egg-info/SOURCES.txt'
+#23 3.344   adding license file 'LICENSE'
+#23 3.345   writing manifest file '/tmp/pip-pip-egg-info-qba9u9ok/deep_ep.egg-info/SOURCES.txt'
+#23 3.651   Preparing metadata (setup.py): finished with status 'done'
+#23 4.053 Installing collected packages: deep_ep
+#23 4.054   DEPRECATION: Legacy editable install of deep_ep==1.1.0+f0d34aa from file:///opt/DeepEP-src (setup.py develop) is deprecated. pip 25.3 will enforce this behaviour change. A possible replacement is to add a pyproject.toml or enable --use-pep517, and use setuptools >= 64. If the resulting installation is not behaving as expected, try using --config-settings editable_mode=compat. Please consult the setuptools documentation for more information. Discussion can be found at https://github.com/pypa/pip/issues/11457
+#23 4.054   Running setup.py develop for deep_ep
+#23 4.054     Running command python setup.py develop
+#23 5.715     No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+#23 5.869     Build summary:
+#23 5.869      > Sources: ['csrc/deep_ep.cpp', 'csrc/kernels/runtime.cu', 'csrc/kernels/layout.cu', 'csrc/kernels/intranode.cu', 'csrc/kernels/internode.cu', 'csrc/kernels/internode_ll.cu']
+#23 5.869      > Includes: ['csrc/', '/opt/nvshmem/include']
+#23 5.869      > Libraries: ['/opt/nvshmem/lib']
+#23 5.870      > Compilation flags: {'cxx': ['-O3', '-Wno-deprecated-declarations', '-Wno-unused-variable', '-Wno-sign-compare', '-Wno-reorder', '-Wno-attributes', '-DDISABLE_AGGRESSIVE_PTX_INSTRS'], 'nvcc': ['-O3', '-Xcompiler', '-O3', '-rdc=true', '--ptxas-options=--register-usage-level=10', '-DDISABLE_AGGRESSIVE_PTX_INSTRS'], 'nvcc_dlink': ['-dlink', '-L/opt/nvshmem/lib', '-lnvshmem_device']}
+#23 5.870      > Link flags: ['-l:libnvshmem_host.so', '-l:libnvshmem_device.a', '-Wl,-rpath,/opt/nvshmem/lib']
+#23 5.870      > Arch list: 9.0+PTX
+#23 5.870      > NVSHMEM path: /opt/nvshmem
+#23 5.870 
+#23 5.870     running develop
+#23 5.870     /usr/local/lib/python3.12/dist-packages/setuptools/command/develop.py:41: EasyInstallDeprecationWarning: easy_install command is deprecated.
+#23 5.870     !!
+#23 5.870 
+#23 5.870             ********************************************************************************
+#23 5.870             Please avoid running ``setup.py`` and ``easy_install``.
+#23 5.871             Instead, use pypa/build, pypa/installer or other
+#23 5.871             standards-based tools.
+#23 5.871 
+#23 5.871             See https://github.com/pypa/setuptools/issues/917 for details.
+#23 5.871             ********************************************************************************
+#23 5.871 
+#23 5.871     !!
+#23 5.871       easy_install.initialize_options(self)
+#23 5.903     /usr/local/lib/python3.12/dist-packages/setuptools/_distutils/cmd.py:90: SetuptoolsDeprecationWarning: setup.py install is deprecated.
+#23 5.903     !!
+#23 5.903 
+#23 5.903             ********************************************************************************
+#23 5.904             Please avoid running ``setup.py`` directly.
+#23 5.904             Instead, use pypa/build, pypa/installer or other
+#23 5.904             standards-based tools.
+#23 5.904 
+#23 5.904             See https://blog.ganssle.io/articles/2021/10/setup-py-deprecated.html for details.
+#23 5.904             ********************************************************************************
+#23 5.904 
+#23 5.904     !!
+#23 5.904       self.initialize_options()
+#23 6.058     running egg_info
+#23 6.076     creating deep_ep.egg-info
+#23 6.081     writing deep_ep.egg-info/PKG-INFO
+#23 6.081     writing dependency_links to deep_ep.egg-info/dependency_links.txt
+#23 6.082     writing top-level names to deep_ep.egg-info/top_level.txt
+#23 6.082     writing manifest file 'deep_ep.egg-info/SOURCES.txt'
+#23 6.116     reading manifest file 'deep_ep.egg-info/SOURCES.txt'
+#23 6.116     adding license file 'LICENSE'
+#23 6.117     writing manifest file 'deep_ep.egg-info/SOURCES.txt'
+#23 6.117     running build_ext
+#23 6.221     building 'deep_ep_cpp' extension
+#23 6.222     creating /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc
+#23 6.222     creating /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels
+#23 6.224     Emitting ninja build file /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/build.ninja...
+#23 6.224     Compiling objects...
+#23 6.224     Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+#23 12.72     [1/7] /usr/local/cuda/bin/nvcc --generate-dependencies-with-compile --dependency-output /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/runtime.o.d -Icsrc/ -I/opt/nvshmem/include -I/usr/local/lib/python3.12/dist-packages/torch/include -I/usr/local/lib/python3.12/dist-packages/torch/include/torch/csrc/api/include -I/usr/local/cuda/include -I/usr/include/python3.12 -c -c /opt/DeepEP-src/csrc/kernels/runtime.cu -o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/runtime.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"'' -O3 -Xcompiler -O3 -rdc=true --ptxas-options=--register-usage-level=10 -DDISABLE_AGGRESSIVE_PTX_INSTRS -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"' -DTORCH_EXTENSION_NAME=deep_ep_cpp -gencode=arch=compute_90,code=compute_90 -gencode=arch=compute_90,code=sm_90 -std=c++17
+#23 13.27     [2/7] /usr/local/cuda/bin/nvcc --generate-dependencies-with-compile --dependency-output /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/layout.o.d -Icsrc/ -I/opt/nvshmem/include -I/usr/local/lib/python3.12/dist-packages/torch/include -I/usr/local/lib/python3.12/dist-packages/torch/include/torch/csrc/api/include -I/usr/local/cuda/include -I/usr/include/python3.12 -c -c /opt/DeepEP-src/csrc/kernels/layout.cu -o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/layout.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"'' -O3 -Xcompiler -O3 -rdc=true --ptxas-options=--register-usage-level=10 -DDISABLE_AGGRESSIVE_PTX_INSTRS -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"' -DTORCH_EXTENSION_NAME=deep_ep_cpp -gencode=arch=compute_90,code=compute_90 -gencode=arch=compute_90,code=sm_90 -std=c++17
+#23 14.55     [3/7] /usr/local/cuda/bin/nvcc --generate-dependencies-with-compile --dependency-output /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/intranode.o.d -Icsrc/ -I/opt/nvshmem/include -I/usr/local/lib/python3.12/dist-packages/torch/include -I/usr/local/lib/python3.12/dist-packages/torch/include/torch/csrc/api/include -I/usr/local/cuda/include -I/usr/include/python3.12 -c -c /opt/DeepEP-src/csrc/kernels/intranode.cu -o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/intranode.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"'' -O3 -Xcompiler -O3 -rdc=true --ptxas-options=--register-usage-level=10 -DDISABLE_AGGRESSIVE_PTX_INSTRS -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"' -DTORCH_EXTENSION_NAME=deep_ep_cpp -gencode=arch=compute_90,code=compute_90 -gencode=arch=compute_90,code=sm_90 -std=c++17
+#23 22.18     [4/7] /usr/local/cuda/bin/nvcc --generate-dependencies-with-compile --dependency-output /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/internode_ll.o.d -Icsrc/ -I/opt/nvshmem/include -I/usr/local/lib/python3.12/dist-packages/torch/include -I/usr/local/lib/python3.12/dist-packages/torch/include/torch/csrc/api/include -I/usr/local/cuda/include -I/usr/include/python3.12 -c -c /opt/DeepEP-src/csrc/kernels/internode_ll.cu -o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/internode_ll.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"'' -O3 -Xcompiler -O3 -rdc=true --ptxas-options=--register-usage-level=10 -DDISABLE_AGGRESSIVE_PTX_INSTRS -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"' -DTORCH_EXTENSION_NAME=deep_ep_cpp -gencode=arch=compute_90,code=compute_90 -gencode=arch=compute_90,code=sm_90 -std=c++17
+#23 35.55     [5/7] c++ -MMD -MF /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/deep_ep.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -fPIC -Icsrc/ -I/opt/nvshmem/include -I/usr/local/lib/python3.12/dist-packages/torch/include -I/usr/local/lib/python3.12/dist-packages/torch/include/torch/csrc/api/include -I/usr/local/cuda/include -I/usr/include/python3.12 -c -c /opt/DeepEP-src/csrc/deep_ep.cpp -o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/deep_ep.o -O3 -Wno-deprecated-declarations -Wno-unused-variable -Wno-sign-compare -Wno-reorder -Wno-attributes -DDISABLE_AGGRESSIVE_PTX_INSTRS -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"' -DTORCH_EXTENSION_NAME=deep_ep_cpp -std=c++17
+#23 44.83     [6/7] /usr/local/cuda/bin/nvcc --generate-dependencies-with-compile --dependency-output /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/internode.o.d -Icsrc/ -I/opt/nvshmem/include -I/usr/local/lib/python3.12/dist-packages/torch/include -I/usr/local/lib/python3.12/dist-packages/torch/include/torch/csrc/api/include -I/usr/local/cuda/include -I/usr/include/python3.12 -c -c /opt/DeepEP-src/csrc/kernels/internode.cu -o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/internode.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"'' -O3 -Xcompiler -O3 -rdc=true --ptxas-options=--register-usage-level=10 -DDISABLE_AGGRESSIVE_PTX_INSTRS -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"' -DTORCH_EXTENSION_NAME=deep_ep_cpp -gencode=arch=compute_90,code=compute_90 -gencode=arch=compute_90,code=sm_90 -std=c++17
+#23 45.24     [7/7] /usr/local/cuda/bin/nvcc /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/deep_ep.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/internode.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/internode_ll.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/intranode.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/layout.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/runtime.o -o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/dlink.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"'' -dlink -L/opt/nvshmem/lib -lnvshmem_device -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"' -DTORCH_EXTENSION_NAME=deep_ep_cpp -gencode=arch=compute_90,code=compute_90 -gencode=arch=compute_90,code=sm_90
+#23 45.24     creating build/lib.linux-x86_64-cpython-312
+#23 45.24     x86_64-linux-gnu-g++ -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -shared -Wl,-O1 -Wl,-Bsymbolic-functions /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/deep_ep.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/internode.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/internode_ll.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/intranode.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/layout.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/kernels/runtime.o /opt/DeepEP-src/build/temp.linux-x86_64-cpython-312/csrc/dlink.o -L/opt/nvshmem/lib -L/usr/local/lib/python3.12/dist-packages/torch/lib -L/usr/local/cuda/lib64 -L/usr/lib/x86_64-linux-gnu -lc10 -ltorch -ltorch_cpu -ltorch_python -lcudart -lc10_cuda -ltorch_cuda -o build/lib.linux-x86_64-cpython-312/deep_ep_cpp.cpython-312-x86_64-linux-gnu.so -l:libnvshmem_host.so -l:libnvshmem_device.a -Wl,-rpath,/opt/nvshmem/lib
+#23 45.56     copying build/lib.linux-x86_64-cpython-312/deep_ep_cpp.cpython-312-x86_64-linux-gnu.so ->
+#23 45.58     Creating /usr/local/lib/python3.12/dist-packages/deep-ep.egg-link (link to .)
+#23 45.58     Adding deep-ep 1.1.0+f0d34aa to easy-install.pth file
+#23 45.58 
+#23 45.58     Installed /opt/DeepEP-src
+#23 45.94 Successfully installed deep_ep-1.1.0+f0d34aa
+#23 45.94 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#23 DONE 46.1s
+
+#24 exporting to image
+#24 exporting layers
+#24 exporting layers 19.1s done
+#24 writing image sha256:263a553f4e6d7f25ba7a52a87a5efe8abd3345a33266a545911ea41ad33efd51 done
+#24 naming to docker.io/library/deepep-on-aws:latest done
+#24 DONE 19.1s
+
+ [33m8 warnings found (use docker --debug to expand):
+[0m - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 87)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 149)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 68)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 69)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 84)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 85)
+ - UndefinedVar: Usage of undefined variable '$CPATH' (did you mean $PATH?) (line 86)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 86)
